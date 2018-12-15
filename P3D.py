@@ -66,6 +66,7 @@ class PLOT3D_FILE:
         # read the grid data
         for i in xrange(self.ngrids):
             #read scalars
+            #TODO: Put into scalar array
             self.mach, self.alpha, self.renolds, self.time  = np.array( f.readReals(data_prec) )
 
             data = np.array( f.readReals(data_prec) )
@@ -96,12 +97,91 @@ class PLOT3D_FILE:
         """
         if grid >= 0 and grid < self.ngrids and i >= 0 and i < self.nvar:
             if self.ndim == 3:
-                return self.grids[grid][:,:,:,i]
+                return np.copy(self.grids[grid][:,:,:,i], order='F')
             else:
-                return self.grids[grid][:,:,i]
+                return np.copy(self.grids[grid][:,:,i], order='F')
         else:
             raise ValueError('could not find variable %d on grid %d' %(i, grid))
             return None
+    
+    
+    def set_var(self, data, grid, i):
+        """
+        Assigns an array for a variable 'i' on grid 'grid'
+
+        Parameters
+        ----------
+        data : floating-point
+            data to be assigned
+        grid : integer
+            grid number to extract data from
+        i : integer
+            varable on the 'grid' you want data from
+
+        Raises
+        ------
+        ValueError
+            when grid or varaiable does not exist
+        """
+        
+        if grid >= 0 and grid < self.ngrids and i >= 0 and i < self.nvar:
+            
+            #TODO: reshape data to size of variable 'i' on grid 'grid'
+            if self.ndim == 3:
+                self.grids[grid][:,:,:,i] = data
+            else:
+                self.grids[grid][:,:,i] = data
+        else:
+            raise ValueError('could not find variable %d on grid %d' %(i, grid))
+            return None
+
+
+
+    def write_file(self, filename, write2D = False, endian='>', header_prec='i', data_prec='d'):
+        """
+        Writes grid and variable data to a PLOT3D file 'filename' on disk 
+        
+        Parameters
+        ----------
+        filename : string
+            Name of the file to read
+        write2D  : boolean
+            [optional] Is the data in a 2d format?
+        endian : character
+            [optional]endianness of the file. '>' for little-endian; '<' for big-endian
+        header_prec : character
+            [optional] precision of integer data types. 'i' for 4-byte; 'l' for 8-byte
+        data_prec : character
+            [optional] precision of floating-point data types. 'f' for 4-byte; 'd' for 8-byte
+        
+        """
+        
+        f = fofi.FortranFile(filename,endian,header_prec, "w")
+        
+        #  the file header
+        f.writeInts([self.ngrids])
+
+
+        #write the grid dims 
+        f.writeInts([ ii for ii in self.dims.ravel()])
+
+
+        # write the grid data
+        for i in xrange(self.ngrids):
+            #read scalars
+            #TODO: Pull from scalar array
+            f.writeReals([self.mach, self.alpha, self.renolds, self.time], data_prec)
+
+            data = self.grids[i]
+            shape = np.prod(data.shape)
+            f.writeReals( [ii for ii in np.reshape(data, shape, order='F')], data_prec)
+
+
+        # complete the write to disk    
+        f.close()
+
+
+
 """    
 #========================================================================
 #========================================================================
