@@ -4,7 +4,6 @@ import fortranfile as fofi
 class PLOT3D_FILE:
     """
     Python reader for NASA Plot3D file written by a Fortran application.
-    Note: Only reads data. Write support in latter version.
     """
 
     def __init__(self):
@@ -88,12 +87,12 @@ class PLOT3D_FILE:
         grid : integer
             grid number to extract data from
         i : integer
-            varable on the 'grid' you want data from
+            variable on the 'grid' you want data from
 
         Raises
         ------
         ValueError
-            when grid or varaiable does not exist
+            when grid or variable does not exist
         """
         if grid >= 0 and grid < self.ngrids and i >= 0 and i < self.nvar:
             if self.ndim == 3:
@@ -116,12 +115,12 @@ class PLOT3D_FILE:
         grid : integer
             grid number to extract data from
         i : integer
-            varable on the 'grid' you want data from
+            variable on the 'grid' you want data from
 
         Raises
         ------
         ValueError
-            when grid or varaiable does not exist
+            when grid or variable does not exist
         """
         
         if grid >= 0 and grid < self.ngrids and i >= 0 and i < self.nvar:
